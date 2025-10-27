@@ -1,0 +1,132 @@
+/* Twinkling animation for decorative elements */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Floating animation for bus elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(-10deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+}
+
+/* Pulse animation for promotional elements */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(251, 191, 36, 0);
+  }
+}
+
+/* Gradient animation for festive background */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced hover effects for buttons */
+.user-dashboard-button:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Custom scrollbar for dropdowns */
+.user-dashboard-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.user-dashboard-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.user-dashboard-dropdown::-webkit-scrollbar-thumb {
+  background: #dc2626;
+  border-radius: 3px;
+}
+
+.user-dashboard-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #b91c1c;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .user-dashboard-main-title {
+    font-size: 28px !important;
+    line-height: 1.3 !important;
+  }
+
+  .user-dashboard-search-button {
+    font-size: 16px !important;
+    padding: 12px 20px !important;
+  }
+
+  .user-dashboard-promo-banner {
+    margin-top: 20px;
+    padding: 20px 16px !important;
+  }
+}
+
+/* Loading animation for search */
+@keyframes searchPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+
+.user-dashboard-search-button.loading {
+  animation: searchPulse 1.5s infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+.user-dashboard-interactive {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced focus states for accessibility */
+.user-dashboard-input:focus {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Custom animations for decorative elements */
+.user-dashboard-decoration {
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+}
+
+.user-dashboard-decoration:nth-child(odd) {
+  animation-delay: 0s;
+}
+
+.user-dashboard-decoration:nth-child(even) {
+  animation-delay: 1.5s;
+}

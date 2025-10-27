@@ -1,0 +1,55 @@
+.rb-ticket-wrapper{
+  background:#fff;
+  color:#000;
+  border-top:4px solid #000;
+  padding:24px 24px 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.rb-ticket-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:12px;
+}
+
+.rb-actions{display:flex;justify-content:flex-end;margin-bottom:10px}
+.rb-btn{display:inline-block;text-decoration:none;padding:8px 14px;border-radius:4px;font-weight:bold}
+.rb-btn-red{background:#d33;color:#fff}
+
+.rb-brand{display:flex;align-items:center;gap:16px}
+.rb-logo{background:#d33;border-radius:6px;color:#fff;padding:6px 10px;font-weight:bold}
+.rb-title{font-size:28px;letter-spacing:1px}
+
+.rb-help{font-size:12px;text-align:right}
+.rb-help-head{font-weight:bold;margin-bottom:4px}
+.rb-meta{color:#555;margin-top:6px}
+
+.rb-route-date{font-size:18px;margin:12px 0;border-top:2px solid #c6c6c6;border-bottom:2px solid #c6c6c6;padding:12px 0}
+.rb-arrow{margin:0 6px}
+.rb-date{color:#333;margin-left:4px}
+
+.rb-grid{display:grid;gap:0;border-bottom:2px solid #e5e5e5}
+.rb-grid-4{grid-template-columns:2fr 1fr 1fr 1fr;border-top:2px solid #f0c13a}
+.rb-grid-3{grid-template-columns:1fr 1fr 1fr}
+.rb-cell{padding:16px;border-right:1px solid #eee}
+.rb-cell:last-child{border-right:none}
+
+.rb-operator{font-weight:bold}
+.rb-subtext{font-size:12px;color:#666;margin-top:6px}
+.rb-label{font-size:12px;color:#666;margin-bottom:6px}
+.rb-value{font-size:14px;color:#000}
+
+.rb-boards{border-top:none}
+
+.rb-passenger{padding:16px 0;border-bottom:2px solid #e5e5e5}
+.rb-row{margin:4px 0}
+.rb-bold{font-weight:bold}
+
+.rb-note{padding:12px 0;border-bottom:2px solid #000}
+
+.rb-fare{padding:12px 0;text-align:right}
+.rb-rupee{font-weight:bold}
+.rb-fare-sub{font-size:12px;color:#666}
+
+

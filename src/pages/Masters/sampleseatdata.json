@@ -1,0 +1,965 @@
+// x, y are points in Quadrant 1.
+
+// z : 0 means lower-berth & z : 1 means upper-berth.
+
+// AFA = Available For Any, AFM = Available For Male, AFF = Available For Female, BFA = Booked For Any, BFM = Booked For Male, BFF = Booked For Female,
+
+{
+    "zrq": {
+        "traceId": "6fae8965-50a1-434e-8f76-da515345b2e3",
+        "api": "IRCT",
+        "busKey": "i57u6hnv/zL1R8DzIur1OMxugSARsnHH6/f1lY7HJvBYVYyUolqZJlKOA2dJacGQSTkRF2Ze3TpGRM5pKT8stB8hn8DVi/Wlc9qkwSJ4WqN+shuUwsmTyP/2dc/w3IfQ1Izd7AC9GSD3tCn6Lt/zdbXTlVs+RAiFvxFu3/9wCrUz0stbmmlyfGo+cYWK+agvB8U8uoXiDtj/dL9VAbMLM2h6ZUDSvW/O5hXPRgerhzUcrtCKWT6ZisdqrwgAQokSR3UJdZapWE4=",
+        "ext": {
+            "timeout": 4000000
+        }
+    },
+    "traceId": "6fae8965-50a1-434e-8f76-da515345b2e3",
+    "api": "IRCT",
+    "tripKey": "i57u6hnv/zL1R8DzIur1OMxugSARsnHH6/f1lY7HJvBYVYyUolqZJlKOA2dJacGQSTkRF2Ze3TpGRM5pKT8stB8hn8DVi/Wlc9qkwSJ4WqN+shuUwsmTyP/2dc/w3IfQ1Izd7AC9GSD3tCn6Lt/zdbXTlVs+RAiFvxFu3/9wCrUz0stbmmlyfGo+cYWK+agvB8U8uoXiDtj/dL9VAbMLM2h6ZUDSvW/O5hXPRgerhzUcrtCKWT6ZisdqrwgAQokSR3UJdZapWE4=",
+    "seats": [
+        {
+            "id": "1",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "1",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 0,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "10",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "10",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 4,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "11",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "11",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 5,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "12",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "12",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 5,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "13",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "13",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 6,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "14",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "14",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 6,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "15",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "15",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 7,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "16",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "16",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 7,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "2",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "2",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "3",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "3",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 1,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "4",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "4",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 1,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "5",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "5",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 2,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "6",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "6",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 2,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "7",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "7",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 3,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "8",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "8",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 3,
+            "y": 0,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "9",
+            "key": "tJA+0vTksEVWNASJSq+H/IJpNh41sS83",
+            "name": "9",
+            "desc": "Lower seater",
+            "status": "BFA",
+            "x": 4,
+            "y": 1,
+            "z": 0,
+            "width": 1,
+            "height": 1,
+            "fare": {
+                "total": 990,
+                "base": 900,
+                "gst": 90,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D1",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D1",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 0,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D10",
+            "key": "tJA+0vTksEXS3zoZhc6yAdngHepsIeqX",
+            "name": "D10",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 0,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1210,
+                "base": 1100,
+                "gst": 110,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D2",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D2",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 2,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D3",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D3",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 4,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D4",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D4",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 6,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D5",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D5",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D6",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "D6",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 4,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D7",
+            "key": "tJA+0vTksEXS3zoZhc6yAdngHepsIeqX",
+            "name": "D7",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 1,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1210,
+                "base": 1100,
+                "gst": 110,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D8",
+            "key": "tJA+0vTksEXS3zoZhc6yAdngHepsIeqX",
+            "name": "D8",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 0,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1210,
+                "base": 1100,
+                "gst": 110,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "D9",
+            "key": "tJA+0vTksEXS3zoZhc6yAdngHepsIeqX",
+            "name": "D9",
+            "desc": "Lower sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 1,
+            "z": 0,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1210,
+                "base": 1100,
+                "gst": 110,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U1",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U1",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 0,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U10",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U10",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 2,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U11",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U11",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 4,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U12",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U12",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 4,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U13",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U13",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 6,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U14",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U14",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 6,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U15",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U15",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U16",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U16",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U17",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U17",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U18",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U18",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U2",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U2",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 2,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U3",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U3",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 4,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U4",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U4",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 6,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U5",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U5",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 8,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U6",
+            "key": "tJA+0vTksEXFfiWpgKmmVNngHepsIeqX",
+            "name": "U6",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 10,
+            "y": 4,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1230,
+                "base": 1100,
+                "gst": 130,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U7",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U7",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 0,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U8",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U8",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 0,
+            "y": 0,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        },
+        {
+            "id": "U9",
+            "key": "tJA+0vTksEVbSR/Gb+xfH0B6CqhFUmyl",
+            "name": "U9",
+            "desc": "Upper sleeper",
+            "status": "BFA",
+            "x": 2,
+            "y": 1,
+            "z": 1,
+            "width": 2,
+            "height": 1,
+            "fare": {
+                "total": 1220,
+                "base": 1100,
+                "gst": 120,
+                "toll": 0,
+                "sCharge": 0,
+                "levyCharge": 0,
+                "txnFee": 0
+            }
+        }
+    ],
+    "boarding": [
+        {
+            "id": "164",
+            "name": "GT Karnal Bypass - Sanjay Gandhi Transport Nagar",
+            "time": "2021-03-28T20:05:00",
+            "phone": "",
+            "address": "Sanjay Gandhi Transport Nagar (New Delhi)",
+            "landmark": "Sanjay Gandhi Transport Nagar (New Delhi)"
+        }
+    ],
+    "dropping": [
+        {
+            "id": "103",
+            "name": "Amritsar Railway Station - Cycle Market - Cycle Market",
+            "time": "2021-03-29T01:00:00",
+            "phone": "",
+            "address": "Cycle Market (Amritsar)",
+            "landmark": "Cycle Market (Amritsar)"
+        }
+    ]
+}

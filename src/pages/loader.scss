@@ -1,0 +1,32 @@
+/* Loader.css */
+
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent background to unfocus content */
+    z-index: 1000; /* Ensure it's on top of other content */
+  }
+  
+  .loader {
+    /* Customize your loader styles here */
+    border: 2px solid #fff; /* Example: Add a border to make it stand out */
+    background-color: #fff; /* Example: Change the background color */
+    padding: 20px; /* Example: Add padding to the loader container */
+  }
+  .loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .loader-text {
+    margin-top: 10px; /* Adjust the margin to position the text relative to the GIF */
+    font-size: 16px; /* Adjust the font size as needed */
+    color: #fff; /* Set the text color */
+  }

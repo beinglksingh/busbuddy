@@ -1,0 +1,16 @@
+{
+  "name": "redBus Lite",
+  "short_name": "redBus Lite",
+  "start_url": "/?app=pwa",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EA4C53",
+  "theme_color": "#EA4C53",
+  "icons": [
+    {
+      "src": "https://s1.rdbuz.com/mweb/images/logos/logo-round_300x300.png",
+      "sizes": "300x300",
+      "type": "image/png"
+    }
+  ]
+}
