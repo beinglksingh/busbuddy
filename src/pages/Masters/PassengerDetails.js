@@ -47,7 +47,7 @@ class PassengerDetails extends Component {
 
   handleProceedToPay = () => {
 
-    var busdata  =  JSON.parse(localStorage.getItem("busdata"));
+    var busdata  =  this.props.busdata || JSON.parse(localStorage.getItem("busdata"));
     
     var traceId  =  busdata.traceid;
     
@@ -214,15 +214,27 @@ class PassengerDetails extends Component {
   
 
   componentDidMount() {
-    const busdata = JSON.parse(localStorage.getItem("busdata"));
-    console.log(busdata);
-    this.setState({
-      busdata : busdata
-    });
+    // Use busdata from props if provided, otherwise fallback to localStorage (for backward compatibility)
+    const busdata = this.props.busdata || JSON.parse(localStorage.getItem("busdata") || 'null');
+    if (busdata) {
+      console.log(busdata);
+      this.setState({
+        busdata : busdata
+      });
+    }
 
     // this.loadPhonePeScript(() => {
     //   console.log('PhonePe script loaded successfully');
     // });
+  }
+
+  componentDidUpdate(prevProps) {
+    // Update busdata if props change
+    if (this.props.busdata && this.props.busdata !== prevProps.busdata) {
+      this.setState({
+        busdata: this.props.busdata
+      });
+    }
   }
 
 
@@ -250,8 +262,47 @@ class PassengerDetails extends Component {
 
   render() {
     const { formData, selectedSeats } = this.state;
+    const { isModal, onBack } = this.props;
+    const containerStyle = isModal ? {
+      background: '#f5f5fa',
+      fontFamily: 'Inter, sans-serif',
+      padding: '20px',
+      width: '100%'
+    } : {
+      background: '#f5f5fa',
+      minHeight: '100vh',
+      fontFamily: 'Inter, sans-serif',
+      padding: '40px 0'
+    };
+    
     return (
-      <div className="container-fluid" style={{ background: '#f5f5fa', minHeight: '100vh', fontFamily: 'Inter, sans-serif', padding: '40px 0' }}>
+      <div className="container-fluid" style={containerStyle}>
+        {isModal && onBack && (
+          <div style={{ marginBottom: '20px' }}>
+            <button 
+              onClick={onBack}
+              style={{ 
+                background: 'transparent', 
+                color: '#666', 
+                border: '1px solid #ddd', 
+                borderRadius: 8, 
+                padding: '8px 16px', 
+                fontWeight: 600, 
+                fontSize: 14, 
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.background = '#f5f5f5';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.background = 'transparent';
+              }}
+            >
+              ← Back
+            </button>
+          </div>
+        )}
         <div className="row justify-content-center">
           {/* Left side: Contact & Passenger Details */}
           <div className="col-lg-7">
