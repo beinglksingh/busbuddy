@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
 import cities from './cities';
 import { API_WEB_URLS } from 'constants/constAPI';
-import PassengerDetails from './PassengerDetails';
+import { Modal, ModalBody } from 'reactstrap';
 
 class BusesList extends Component {
 
@@ -20,13 +19,10 @@ class BusesList extends Component {
       showSeats: false, // for seat selection UI
       seatData: [],     // for seat layout
       selectedSeats: [],// for selected seat ids
-      selectedSeatsData: [], // for full seat objects with fare info
       selectedBusId: null, // Track which bus's seats are shown
       showBoardDropModal: false,
       selectedBoardingId: '',
       selectedDroppingId: '',
-      activeTab: 1, // 1: Select seats, 2: Board/Drop point, 3: Passenger Info
-      preparedBusdata: null, // Bus data prepared for PassengerDetails component
       // responsive/ui state
       isMobile: false,
       showFilters: false,
@@ -181,37 +177,6 @@ class BusesList extends Component {
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    // Auto-select boarding/dropping points when tab 2 is active and busdata is available
-    if (this.state.activeTab === 2 && this.state.busdata && 
-        (!prevState.busdata || prevState.activeTab !== 2)) {
-      const { busdata, selectedBoardingId, selectedDroppingId } = this.state;
-      
-      let shouldUpdate = false;
-      let newBoardingId = selectedBoardingId;
-      let newDroppingId = selectedDroppingId;
-      
-      // Auto-select if only 1 boarding point exists and not already selected
-      if (busdata.boarding && busdata.boarding.length === 1 && !selectedBoardingId) {
-        newBoardingId = busdata.boarding[0].id;
-        shouldUpdate = true;
-      }
-      
-      // Auto-select if only 1 dropping point exists and not already selected
-      if (busdata.dropping && busdata.dropping.length === 1 && !selectedDroppingId) {
-        newDroppingId = busdata.dropping[0].id;
-        shouldUpdate = true;
-      }
-      
-      if (shouldUpdate) {
-        this.setState({
-          selectedBoardingId: newBoardingId,
-          selectedDroppingId: newDroppingId
-        });
-      }
-    }
-  }
-
   componentWillUnmount() {
     window.removeEventListener('resize', this.handleResize);
   }
@@ -268,7 +233,6 @@ class BusesList extends Component {
     .then(response => response.json())
     .then(data => {
       const parsed = JSON.parse(data.data);
-      console.log('parsed----------------->>>>>',parsed);
       this.setState({
         seatslist : parsed ,
         seatData : parsed.seats,
@@ -283,11 +247,7 @@ class BusesList extends Component {
         busdata : bus,
      //   showSeats: true, // show seat selection UI
         selectedSeats: [], // reset selection
-        selectedSeatsData: [], // reset seat data with fare info
         selectedBusId: busId, // Set selected bus
-        selectedBoardingId: '', // reset boarding point
-        selectedDroppingId: '', // reset dropping point
-        activeTab: 1, // reset to tab 1
       });
     })
     .catch(error => {
@@ -300,21 +260,14 @@ class BusesList extends Component {
   }
 
   handleSeatClick(seat) {
-    const { selectedSeats, selectedSeatsData } = this.state;
+    const { selectedSeats } = this.state;
     const isSelected = selectedSeats.includes(seat.id);
     if (isSelected) {
-      // Deselect - remove from both arrays
-      this.setState({ 
-        selectedSeats: selectedSeats.filter(id => id !== seat.id),
-        selectedSeatsData: selectedSeatsData.filter(s => s.id !== seat.id)
-      });
+      // Deselect
+      this.setState({ selectedSeats: selectedSeats.filter(id => id !== seat.id) });
     } else {
       if (selectedSeats.length >= 6) return; // Max 6
-      // Select - add to both arrays (IDs and full seat objects)
-      this.setState({ 
-        selectedSeats: [...selectedSeats, seat.id],
-        selectedSeatsData: [...selectedSeatsData, seat]
-      });
+      this.setState({ selectedSeats: [...selectedSeats, seat.id] });
     }
   }
 
@@ -358,245 +311,167 @@ class BusesList extends Component {
     // - seat.y (from API) controls horizontal position (columns - left to right)
     
     const { minX, minY, maxX, maxY } = this.getGridBounds(seats, z);
-    const seatSize = isMobile ? 36 : 50; // Optimized seat size
-    const gapBetweenSeats = isMobile ? 6 : 8; // Reduced gap between seats
+    const seatSize = isMobile ? 32 : 48; // px per grid unit
     const isLower = z == 0;
     
-    // Get all unique column positions (Y values)
+    // Use actual API Y values to preserve natural spacing between columns
+    // Don't compress gaps - keep natural spacing like in the reference image
     const columnValues = new Set();
     seats.filter(s => s.z === z).forEach(seat => {
-      columnValues.add(seat.y);
+      for (let i = 0; i < (seat.width || 1); i++) {
+        columnValues.add(seat.y + i);
+      }
     });
     const sortedColumns = Array.from(columnValues).sort((a, b) => a - b);
     
-    // Create a mapping from original Y to normalized position
-    // This compresses large gaps (aisles) significantly
+    // Create mapping: API column value -> position
+    // Keep natural positions with gaps preserved
     const columnMapping = new Map();
-    let normalizedPosition = 0;
-    const maxGap = 1.5; // Reduced maximum gap for aisle (compress gallery more)
-    
     sortedColumns.forEach((col, index) => {
-      if (index === 0) {
-        columnMapping.set(col, normalizedPosition);
-      } else {
-        const actualGap = col - sortedColumns[index - 1];
-        // Compress large gaps (aisles) significantly - maximum 1.5 units
-        const normalizedGap = actualGap > maxGap ? maxGap : actualGap;
-        normalizedPosition += normalizedGap;
-        columnMapping.set(col, normalizedPosition);
-      }
+      columnMapping.set(col, col); // Use actual Y value instead of sequential index
     });
     
-    // Calculate total grid width based on normalized positions
-    const maxNormalizedY = Math.max(...Array.from(columnMapping.values()));
-    const totalColumns = maxNormalizedY + 1;
+    const totalColumns = sortedColumns.length;
+    const columnSpan = maxY - minY + 1; // Actual span of columns
     
-    // Calculate container width - each column gets seatSize + gap
-    const seatGridWidth = totalColumns * (seatSize + gapBetweenSeats) - gapBetweenSeats;
-    const seatGridHeight = (maxX - minX + 1) * (seatSize + (isMobile ? 6 : 8));
+    // Container size based on actual column span to preserve spacing
+    const seatGridWidth = columnSpan * seatSize;
+    const seatGridHeight = (maxX - minX + 1) * seatSize;
     
     const deckSeats = seats.filter(s => s.z === z);
     
     return (
+ 
       <>
-        <div style={{
-          position: 'relative',
-          width: seatGridWidth + (isMobile ? 8 : 10), // Exact width: grid width + left padding only
-          height: seatGridHeight + (isMobile ? 24 : 28),
-          background: '#fafbfc',
-          borderRadius: 16,
-          margin: '0 0 12px 0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-          paddingTop: isMobile ? 20 : 24,
-          paddingLeft: isMobile ? 8 : 10,
-          paddingRight: 0, // No right padding - no extra space after last seat
-          paddingBottom: isMobile ? 8 : 10,
-          minHeight: isMobile ? 160 : 180,
-          overflow: 'visible',
-        }}>
-          {/* Deck label and steering */}
-          <div style={{ position: 'absolute', left: isMobile ? 8 : 10, top: isMobile ? -6 : -8, fontWeight: 700, fontSize: isMobile ? 16 : 18, color: '#333' }}>
-            {isLower ? 'Lower deck' : 'Upper deck'}
-          </div>
-          {isLower && <div style={{ position: 'absolute', right: 0, top: isMobile ? -6 : -8, fontSize: isMobile ? 24 : 28, color: '#bbb' }}> 
-            <span role="img" aria-label="steering">🛞</span>
-          </div>}
-         
-          {/* Render seats */}
-          {deckSeats.map(seat => {
-            const isSelected = selectedSeats.includes(seat.id);
-            // Check status - handle various formats
-            const seatStatus = (seat.status || seat.Status || '').toString().toUpperCase();
             
-            // Determine if seat is booked
-            const isBooked = seatStatus && seatStatus.startsWith('B');
-            const isFemale = seatStatus && seatStatus.endsWith('F');
-            const isMale = seatStatus && seatStatus.includes('M') && !isBooked;
-            
-            // Detect sleeper types
-            const isHorizontalSleeper = seat.width > 1;
-            const isVerticalSleeper = seat.height > 1;
-            const isSleeper = isHorizontalSleeper || isVerticalSleeper;
-            
-            // Colors
-            let bg = '#fff', border = '#1aaf5d', color = '#222', opacity = 1;
-            if (isBooked) { bg = '#f5f5f5'; border = '#ddd'; color = '#999'; opacity = 0.7; }
-            if (isSelected) { bg = '#0fa11f'; border = '#0fa11f'; color = '#fff'; }
-            if (isFemale && !isBooked && !isSelected) { border = '#e91e63'; }
-            if (isMale && !isBooked && !isSelected) { border = '#2196f3'; }
-            
-            // Get normalized Y position
-            const normalizedY = columnMapping.get(seat.y) || 0;
-            
-            // Flip horizontally: rightmost becomes leftmost (like RedBus)
-            const flippedY = maxNormalizedY - normalizedY;
-            
-            // Calculate position - ensure no overlaps
-            const left = flippedY * (seatSize + gapBetweenSeats) + leftOffset;
-            const top = (seat.x - minX) * (seatSize + (isMobile ? 6 : 8)) + (isMobile ? 20 : 24);
-            
-            // Calculate seat width - ensure no overlaps
-            let seatWidth = seatSize;
-            
-            if (isHorizontalSleeper && seat.width > 1) {
-              // For horizontal sleepers spanning multiple columns
-              const startY = normalizedY;
-              const endY = columnMapping.get(seat.y + seat.width - 1);
-              if (endY !== undefined) {
-                const spanColumns = Math.abs(endY - startY) + 1;
-                seatWidth = spanColumns * (seatSize + gapBetweenSeats) - gapBetweenSeats;
-              } else {
-                // Fallback: use seat width directly
-                seatWidth = seat.width * (seatSize + gapBetweenSeats) - gapBetweenSeats;
-              }
-              // Ensure minimum width
-              seatWidth = Math.max(seatWidth, seatSize);
-            }
-            
-            // Calculate seat height
-            const seatHeight = isVerticalSleeper ? seat.height * (seatSize + (isMobile ? 6 : 8)) - (isMobile ? 6 : 8) : seatSize;
-            
-            return (
-              <div
-                key={seat.id}
-                onClick={() => !isBooked && this.handleSeatClick(seat)}
-                style={{
-                  position: 'absolute',
-                  left: `${left}px`,
-                  top: `${top}px`,
-                  width: `${seatWidth}px`,
-                  height: `${seatHeight}px`,
-                  background: bg,
-                  border: `2px solid ${border}`,
-                  color,
-                  borderRadius: isSleeper ? 10 : 6,
-                  boxShadow: isSelected ? '0 0 0 3px rgba(15, 161, 31, 0.3)' : '0 2px 4px rgba(0,0,0,0.08)',
-                  opacity,
-                  cursor: isBooked ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 600,
-                  fontSize: isMobile ? (isSleeper ? 11 : 10) : (isSleeper ? 14 : 12),
-                  zIndex: isSelected ? 10 : 1,
-                  transition: 'all 0.2s ease',
-                  userSelect: 'none',
-                  overflow: 'hidden',
-                  padding: '4px 6px',
-                  boxSizing: 'border-box',
-                  minWidth: isMobile ? 36 : 44,
-                }}
-                onMouseEnter={(e) => {
-                  if (!isBooked && !isSelected) {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isBooked && !isSelected) {
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.08)';
-                  }
-                }}
-              >
-                {/* Gender icon */}
-                {isFemale && !isBooked && <span style={{ color: '#e91e63', fontSize: isMobile ? 10 : 12, marginBottom: 2, lineHeight: 1 }}>♀</span>}
-                {isMale && !isBooked && <span style={{ color: '#2196f3', fontSize: isMobile ? 10 : 12, marginBottom: 2, lineHeight: 1 }}>♂</span>}
-                
-                {/* Seat name */}
-                <div style={{ 
-                  fontSize: isMobile ? (isSleeper ? 11 : 10) : (isSleeper ? 14 : 12),
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  width: '100%',
-                  marginTop: (isFemale || isMale) && !isBooked ? 0 : 0
-                }}>
-                  {seat.name}
-                </div>
-                
-                {/* Price or Sold */}
-                <div style={{ 
-                  fontSize: isMobile ? 9 : 10, 
-                  fontWeight: isBooked ? 400 : 500, 
-                  marginTop: 2,
-                  lineHeight: 1.1,
-                  textAlign: 'center',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  width: '100%',
-                  opacity: isBooked ? 0.7 : 1
-                }}>
-                  {isBooked ? <span style={{ color: '#999' }}>Sold</span> : `₹${seat.fare?.base || ''}`}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      <div style={{
+        position: 'relative',
+        width: seatGridWidth + 24, // Add padding on both sides
+        height: seatGridHeight + 32,
+        background: '#fafbfc',
+        borderRadius: 16,
+        margin: '0 0 12px 0',
+        boxShadow: '0 2px 8px #0001',
+        paddingTop: 28,
+        paddingLeft: 12,
+        paddingRight: 12,
+        paddingBottom: 12,
+        minHeight: isMobile ? 160 : 180,
+      }}>
+        {/* Deck label and steering */}
+        <div style={{ position: 'absolute', left: 12, top: -9, fontWeight: 700, fontSize: isMobile ? 16 : 18 }}>{isLower ? 'Lower deck' : 'Upper deck'}</div>
+        {isLower && <div style={{ position: 'absolute', right: 12, top: -9, fontSize: isMobile ? 24 : 28, color: '#bbb' }}> <span role="img" aria-label="steering">🛞</span></div>}
+       
+        {/* Render seats */}
+        {deckSeats.map(seat => {
+          const isSelected = selectedSeats.includes(seat.id);
+          // Check status - handle various formats
+          const seatStatus = (seat.status || seat.Status || '').toString().toUpperCase();
+          
+          // Determine if seat is booked - must explicitly start with 'B' for booked status
+          // Status like 'BFA', 'BFM', 'BFF' means booked, 'AFA', 'AFM', 'AFF' means available
+          const isBooked = seatStatus && seatStatus.startsWith('B');
+          const isFemale = seatStatus && seatStatus.endsWith('F');
+          const isMale = seatStatus && seatStatus.includes('M') && !isBooked;
+          
+          // Detect sleeper types based on the pattern
+          const isHorizontalSleeper = seat.width > 1; // Width > 1 means horizontal sleeper
+          const isVerticalSleeper = seat.height > 1; // Height > 1 means vertical sleeper  
+          const isSleeper = isHorizontalSleeper || isVerticalSleeper;
+          
+          // Colors
+          let bg = '#fff', border = '#1aaf5d', color = '#222', opacity = 1;
+          if (isBooked) { bg = '#eee'; border = '#bbb'; color = '#bbb'; opacity = 0.6; }
+          if (isSelected) { bg = '#0fa11f'; border = '#0fa11f'; color = '#fff'; }
+          if (isFemale && !isBooked) { border = '#e91e63'; }
+          if (isMale && !isBooked) { border = '#2196f3'; }
+          
+          // Position for VERTICAL layout with horizontal flip:
+          // seat.x controls vertical (top/bottom), seat.y controls horizontal (left/right)
+          // Use actual Y position to preserve natural gaps
+          const actualY = columnMapping.get(seat.y) || seat.y; // Get actual Y value
+          
+          // Flip horizontally: rightmost becomes leftmost
+          // Use actual Y values to preserve spacing gaps
+          const relativeY = actualY - minY; // Convert to 0-based position
+          const flippedY = columnSpan - 1 - relativeY; // Flip: rightmost becomes leftmost
+          
+          // Position seats using the flipped, preserved spacing
+          const left = flippedY * seatSize + leftOffset;
+          const top = (seat.x - minX) * seatSize + 28;
+          
+          // Seat dimensions for VERTICAL layout - create visible gaps between seats
+          // Make seats narrower to create horizontal spacing
+          const horizontalGap = 16; // Gap for visibility
+          let seatWidth = seatSize - horizontalGap;
+          
+          if (isHorizontalSleeper && seat.width > 1) {
+            // For horizontal sleepers, they span multiple Y positions (columns)
+            // Use width directly
+            seatWidth = seat.width * seatSize - horizontalGap;
+          }
+          
+          // Keep vertical height with some spacing
+          const seatHeight = isVerticalSleeper ? seat.height * seatSize - 20 : seatSize - 20;
+          
+          return (
+            <>
+            <div
+              key={seat.id}
+              onClick={() => !isBooked && this.handleSeatClick(seat)}
+              style={{
+                position: 'absolute',
+                left,
+                top,
+                width: seatWidth,
+                height: seatHeight,
+                background: bg,
+                border: `2px solid ${border}`,
+                color,
+                borderRadius: isSleeper ? 12 : 8,
+                boxShadow: isSelected ? '0 0 0 3px #0fa11f44' : '0 2px 8px #0001',
+                opacity,
+                cursor: isBooked ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 600,
+                fontSize: isMobile ? (isSleeper ? 12 : 10) : (isSleeper ? 15 : 13),
+                zIndex: isSelected ? 2 : 1,
+                transition: 'background 0.2s, border 0.2s',
+                userSelect: 'none',
+              }}
+            >
+
+              
+              {/* Gender icon */}
+              {isFemale && <span style={{ color: '#e91e63', fontSize: 14, marginBottom: 1 }}>♀️</span>}
+              {isMale && <span style={{ color: '#2196f3', fontSize: 14, marginBottom: 1 }}>♂️</span>}
+              {/* Seat name */}
+              <div>{seat.name}</div>
+              {/* Price or Sold */}
+              <div style={{ fontSize: 11, fontWeight: 500, marginTop: 1 }}>
+             {isBooked ? <span style={{ color: '#bbb' }}>Sold</span> : `₹${seat.fare?.base || ''}`}
+           </div>
+            </div>
+           
+           </>
+          );
+        })}
+      </div>
       </>
     );
   }
 
   handleProceed() {
-    // Switch to tab 2 (Board/Drop point) instead of opening modal
-    const { busdata } = this.state;
-    
-    // Auto-select if only 1 boarding point and 1 dropping point exist
-    let autoSelectedBoarding = '';
-    let autoSelectedDropping = '';
-    
-    if (busdata && busdata.boarding && busdata.boarding.length === 1) {
-      autoSelectedBoarding = busdata.boarding[0].id;
-    }
-    
-    if (busdata && busdata.dropping && busdata.dropping.length === 1) {
-      autoSelectedDropping = busdata.dropping[0].id;
-    }
-    
-    this.setState({ 
-      activeTab: 2,
-      selectedBoardingId: autoSelectedBoarding || this.state.selectedBoardingId,
-      selectedDroppingId: autoSelectedDropping || this.state.selectedDroppingId
-    });
+    // Open modal for boarding/dropping selection
+    this.setState({ showBoardDropModal: true });
   }
 
   handleBoardDropConfirm() {
-    // Calculate total base fare from individual selected seats (jo seat par dikh rahi hai)
-    const { selectedSeatsData } = this.state;
-    let totalBase = 0;
-    
-    if (selectedSeatsData && selectedSeatsData.length > 0) {
-      selectedSeatsData.forEach(seat => {
-        totalBase += (seat.fare?.base || 0);
-      });
-    } else {
-      // Fallback to bus fare if seat data not available
-      totalBase = this.state.busdata.fares[0].base * this.state.selectedSeats.length;
-    }
-    
+    // You can use selectedBoardingId and selectedDroppingId for next steps
+    this.setState({ showBoardDropModal: false });
     const busdata  =  {
       busid : this.state.selectedBusId,
       busname : this.state.busdata.name,
@@ -607,7 +482,6 @@ class BusesList extends Component {
       BpName   : this.state.busdata.boarding.find(bp => bp.id === this.state.selectedBoardingId).name,
       DpName : this.state.busdata.dropping.find(dp => dp.id === this.state.selectedDroppingId).name,
       Seats : this.state.selectedSeats,
-      SeatsData : selectedSeatsData, // Include full seat data with individual fares
       Dptime : this.state.busdata.timeD,
       Bptime : this.state.busdata.timeA,
       traceid : this.state.traceId,
@@ -616,13 +490,12 @@ class BusesList extends Component {
       to : this.state.to,
       src : this.state.fromCityName,
       dst : this.state.toCityName,
-      fare : totalBase, // Total base fare of all selected seats (jo seat par show hai)
-      totalfare : totalBase, // Base fare - charges aage add honge
+      fare : this.state.busdata.fares[0].base,
+      gst : this.state.busdata.fares[0].gst,
+      totalfare : Number(this.state.busdata.fares[0].base)*Number(this.state.selectedSeats.length),
     }
     localStorage.setItem("busdata", JSON.stringify(busdata));
-    // Store busdata in state for passing to PassengerDetails component
-    this.setState({ preparedBusdata: busdata });
-    // Navigation removed - now handled by modal tab switching
+      this.props.history.push(`/passengerdetails`);
   }
 
   render() {
@@ -1536,7 +1409,7 @@ class BusesList extends Component {
                         overflowX: 'hidden',
                       zIndex: 1000,
                       animation: 'slideUpFromBottom 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                      transform: isMobile ? 'none' : 'translateY(0)',
+                      transform: 'translateY(0)',
                         borderTop: isMobile ? 'none' : '3px solid #d44',
                         display: 'flex',
                         flexDirection: 'column',
@@ -1578,12 +1451,12 @@ class BusesList extends Component {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            this.setState({ showSeats: false, selectedBusId: null, activeTab: 1 });
+                            this.setState({ showSeats: false, selectedBusId: null });
                           }}
                           onTouchStart={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            this.setState({ showSeats: false, selectedBusId: null, activeTab: 1 });
+                            this.setState({ showSeats: false, selectedBusId: null });
                           }}
                           style={{
                             background: '#fff',
@@ -1632,74 +1505,32 @@ class BusesList extends Component {
                             {this.state.fromCityName} → {this.state.toCityName}
                         </div>
                         
-                        {/* Step Navigation - Clickable Tabs */}
+                        {/* Step Navigation */}
                           <div style={{ display: 'flex', gap: isMobile ? 12 : 24, alignItems: 'center', overflowX: 'auto', width: '100%', justifyContent: 'center' }}>
-                          <div 
-                            onClick={() => this.setState({ activeTab: 1 })}
-                            style={{ 
-                              color: this.state.activeTab === 1 ? '#d44' : '#666', 
-                              fontWeight: this.state.activeTab === 1 ? 600 : 500, 
+                          <div style={{ 
+                            color: '#d44', 
+                            fontWeight: 600, 
                               fontSize: isMobile ? 12 : 14,
-                              borderBottom: this.state.activeTab === 1 ? '2px solid #d44' : 'none',
+                            borderBottom: '2px solid #d44',
                               paddingBottom: 4,
-                              whiteSpace: 'nowrap',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s'
-                            }}
-                          >
+                              whiteSpace: 'nowrap'
+                          }}>
                             1. Select seats
                           </div>
-                          <div 
-                            onClick={() => {
-                              if (selectedSeats.length > 0) {
-                                const { busdata } = this.state;
-                                let autoSelectedBoarding = this.state.selectedBoardingId;
-                                let autoSelectedDropping = this.state.selectedDroppingId;
-                                
-                                // Auto-select if only 1 boarding point and 1 dropping point exist
-                                if (busdata && busdata.boarding && busdata.boarding.length === 1 && !autoSelectedBoarding) {
-                                  autoSelectedBoarding = busdata.boarding[0].id;
-                                }
-                                
-                                if (busdata && busdata.dropping && busdata.dropping.length === 1 && !autoSelectedDropping) {
-                                  autoSelectedDropping = busdata.dropping[0].id;
-                                }
-                                
-                                this.setState({ 
-                                  activeTab: 2,
-                                  selectedBoardingId: autoSelectedBoarding,
-                                  selectedDroppingId: autoSelectedDropping
-                                });
-                              }
-                            }}
-                            style={{ 
-                              color: this.state.activeTab === 2 ? '#d44' : '#666', 
-                              fontWeight: this.state.activeTab === 2 ? 600 : 500, 
+                          <div style={{ 
+                            color: '#666', 
+                            fontWeight: 500, 
                               fontSize: isMobile ? 12 : 14,
-                              borderBottom: this.state.activeTab === 2 ? '2px solid #d44' : 'none',
-                              paddingBottom: 4,
-                              whiteSpace: 'nowrap',
-                              cursor: selectedSeats.length > 0 ? 'pointer' : 'not-allowed',
-                              opacity: selectedSeats.length > 0 ? 1 : 0.5,
-                              transition: 'all 0.2s'
-                            }}
-                          >
+                              whiteSpace: 'nowrap'
+                          }}>
                             2. Board/Drop point
                           </div>
-                          <div 
-                            onClick={() => selectedSeats.length > 0 && selectedBoardingId && selectedDroppingId && this.setState({ activeTab: 3 })}
-                            style={{ 
-                              color: this.state.activeTab === 3 ? '#d44' : '#666', 
-                              fontWeight: this.state.activeTab === 3 ? 600 : 500, 
+                          <div style={{ 
+                            color: '#666', 
+                            fontWeight: 500, 
                               fontSize: isMobile ? 12 : 14,
-                              borderBottom: this.state.activeTab === 3 ? '2px solid #d44' : 'none',
-                              paddingBottom: 4,
-                              whiteSpace: 'nowrap',
-                              cursor: (selectedSeats.length > 0 && selectedBoardingId && selectedDroppingId) ? 'pointer' : 'not-allowed',
-                              opacity: (selectedSeats.length > 0 && selectedBoardingId && selectedDroppingId) ? 1 : 0.5,
-                              transition: 'all 0.2s'
-                            }}
-                          >
+                              whiteSpace: 'nowrap'
+                          }}>
                             3. Passenger Info
                           </div>
                         </div>
@@ -1709,9 +1540,6 @@ class BusesList extends Component {
                         <div style={{ width: isMobile ? 36 : 40, flexShrink: 0 }}></div>
                       </div>
                       
-                      {/* Tab 1: Select Seats */}
-                      {this.state.activeTab === 1 && (
-                        <>
                       {this.state.isSeatsLoading ? (
                         <div style={{ textAlign: 'center', fontWeight: 600 }}>Loading seats...</div>
                       ) : (
@@ -1720,7 +1548,7 @@ class BusesList extends Component {
                           gap: 20, 
                           height: isMobile ? 'auto' : 'calc(100vh - 150px)', 
                           alignItems: 'flex-start', 
-                          paddingBottom: isMobile && selectedSeats.length > 0 ? '90px' : (isMobile && showSeats ? '180px' : (selectedSeats.length > 0 ? '100px' : '0')), 
+                          paddingBottom: selectedSeats.length > 0 ? '100px' : '0', 
                           flexDirection: isMobile ? 'column' : 'row',
                           flex: isMobile ? '0 0 auto' : 1,
                           minHeight: 0,
@@ -1735,55 +1563,46 @@ class BusesList extends Component {
                             flex: isMobile ? 1 : 1, 
                             display: (isMobile && this.state.showMobileBusDetails) ? 'none' : 'flex', 
                             flexDirection: 'column', 
-                            gap: 12, // Reduced gap
+                            gap: 16, 
                             height: 'auto',
                             overflow: 'visible',
                             minHeight: 0,
                             width: isMobile ? '100%' : 'auto',
-                            minWidth: 'fit-content',
-                            paddingBottom: isMobile && selectedSeats.length > 0 ? '100px' : (isMobile && showSeats ? '180px' : '0')
+                            minWidth: 'fit-content'
                           }}>
-                            {/* Decks Row - Always Side by Side Like RedBus */}
-                            {(() => {
-                              // Minimal gap - just 2px between decks since paddingRight is 0
-                              var deckGap = 2;
-                              
-                              return (
-                                <div style={{ 
-                                  display: 'flex', 
-                                  gap: deckGap,
-                                  flexShrink: 0,
-                                  flexDirection: 'row', // Always side by side
-                                  alignItems: 'flex-start',
-                                  justifyContent: 'flex-start',
-                                  width: '100%',
-                                  minWidth: 'fit-content',
-                                  overflowX: isMobile ? 'auto' : 'visible',
-                                  overflowY: 'visible',
-                                  WebkitOverflowScrolling: 'touch'
-                                }}>
+                            {/* Decks Row - Side by Side */}
+                            <div style={{ 
+                              display: 'flex', 
+                              gap: isMobile ? 8 : 20, 
+                              flexShrink: 0,
+                              flexDirection: isMobile ? 'row' : 'row',
+                              alignItems: 'flex-start',
+                              width: '100%',
+                              minWidth: 'fit-content',
+                              overflow: 'visible'
+                            }}>
                               {/* Lower Deck Section */}
                               <div style={{ 
-                                flex: '0 0 auto', 
+                                flex: isMobile ? 1 : 1.5, 
                                 display: 'flex', 
                                 flexDirection: 'column', 
-                                background: 'transparent', 
+                                background: '#fff', 
                                 borderRadius: 12, 
-                                padding: 0,
-                                minWidth: isMobile ? 100 : 380,
-                                width: 'auto',
-                                height: 'auto',
-                                alignSelf: 'flex-start',
-                                flexShrink: 0
+                                padding: isMobile ? 12 : 16,
+                                minWidth: 0,
+                                height: isMobile ? 'auto' : 'fit-content'
                               }}>
+                            {/* Lower Deck Label */}
+                                {/* <div style={{ marginBottom: isMobile ? 12 : 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                  <span style={{ fontSize: isMobile ? 16 : 18, fontWeight: 700, color: '#333' }}>Lower deck</span>
+                                  <span style={{ fontSize: isMobile ? 18 : 20, color: '#bbb' }}>🛞</span>
+                            </div> */}
                             {/* Lower Deck Grid */}
                             <div style={{ 
-                              overflowX: 'visible', 
-                              overflowY: 'visible',
+                              overflow: 'hidden', 
                               width: '100%',
-                              minHeight: 'auto',
-                              position: 'relative',
-                              WebkitOverflowScrolling: 'touch'
+                              minHeight: isMobile ? 'auto' : 300,
+                              position: 'relative'
                             }}>
                               {this.renderSeatGrid(seatData, 0)}
                             </div>
@@ -1794,32 +1613,32 @@ class BusesList extends Component {
                                 flex: '0 0 auto', 
                                 display: 'flex', 
                                 flexDirection: 'column', 
-                                background: 'transparent', 
+                                background: '#fff', 
                                 borderRadius: 12, 
-                                padding: 0,
-                                minWidth: isMobile ? 270 : 380,
-                                width: 'auto',
-                                height: 'auto',
+                                padding: isMobile ? 12 : 16,
+                                minWidth: '300px',
+                                width: '45%',
+                                height: isMobile ? 'auto' : 'fit-content',
                                 visibility: 'visible',
                                 opacity: 1,
-                                flexShrink: 0,
-                                alignSelf: 'flex-start'
+                                flexShrink: 0
                               }}>
+                            {/* Upper Deck Label */}
+                                {/* <div style={{ marginBottom: isMobile ? 12 : 16 }}>
+                                  <span style={{ fontSize: isMobile ? 16 : 18, fontWeight: 700, color: '#333' }}>Upper deck</span>
+                            </div> */}
                             {/* Upper Deck Grid */}
                             <div className="seat-scroll" style={{ 
-                              overflowX: 'visible', 
+                              overflowX: 'hidden', 
                                   overflowY: 'visible',
                                   width: '100%',
-                                  minHeight: 'auto',
-                                  position: 'relative',
-                                  WebkitOverflowScrolling: 'touch'
+                                  minHeight: isMobile ? 'auto' : 300,
+                                  position: 'relative'
                             }}>
                               {this.renderSeatGrid(seatData, 1, 0)}
                                 </div>
                             </div>
                           </div>
-                            );
-                            })()}
 
                             {/* Seat Types Legend - Below the Decks */}
                           <div
@@ -3162,7 +2981,7 @@ class BusesList extends Component {
                                     top: 0,
                                     left: 0,
                                     right: 0,
-                                bottom: selectedSeats.length > 0 ? '80px' : 0,
+                                bottom: 0,
                                     background: 'rgba(0, 0, 0, 0.5)',
                                     zIndex: 1001,
                                     animation: 'fadeIn 0.3s ease-out'
@@ -3184,17 +3003,16 @@ class BusesList extends Component {
                                 }}
                               style={{ 
                                 position: 'fixed',
-                                bottom: selectedSeats.length > 0 ? '80px' : '0px',
-                                left: '0px',
-                                right: '0px',
-                                top: 'auto',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                top: this.state.showMobileBusDetails ? 0 : 'auto',
                                 background: '#fff',
                                 borderRadius: this.state.showMobileBusDetails ? '0' : '16px 16px 0 0',
                                 boxShadow: this.state.showMobileBusDetails ? '0 0 20px rgba(0,0,0,0.3)' : '0 -2px 12px rgba(0,0,0,0.15)',
                                 zIndex: 1002,
-                                height: this.state.showMobileBusDetails ? 'calc(100vh - ' + (selectedSeats.length > 0 ? '80px' : '0px') + ')' : 'auto',
-                                minHeight: this.state.showMobileBusDetails ? 'calc(100vh - ' + (selectedSeats.length > 0 ? '80px' : '0px') + ')' : '120px',
-                                maxHeight: this.state.showMobileBusDetails ? 'calc(100vh - ' + (selectedSeats.length > 0 ? '80px' : '0px') + ')' : '40vh',
+                                height: this.state.showMobileBusDetails ? '100vh' : 'auto',
+                                maxHeight: this.state.showMobileBusDetails ? '100vh' : '40vh',
                                 width: '100%',
                                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                                 overflow: 'hidden',
@@ -3202,13 +3020,7 @@ class BusesList extends Component {
                                 flexDirection: 'column',
                                 touchAction: 'pan-y',
                                 willChange: 'transform',
-                                WebkitTransform: 'translateZ(0)',
-                                transform: 'translateZ(0)',
-                                backfaceVisibility: 'hidden',
-                                WebkitBackfaceVisibility: 'hidden',
-                                margin: 0,
-                                padding: 0,
-                                boxSizing: 'border-box'
+                                WebkitTransform: 'translateZ(0)'
                               }}
                             >
                                 {/* Header with Close Button when expanded */}
@@ -3219,38 +3031,6 @@ class BusesList extends Component {
                                     flexShrink: 0,
                                     background: '#fff'
                                   }}>
-                                    {/* Drag Handle */}
-                                    <div 
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        this.setState({ showMobileBusDetails: false });
-                                      }}
-                                      onTouchStart={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        this.setState({ showMobileBusDetails: false });
-                                      }}
-                                      style={{ 
-                                        width: '100%',
-                                        paddingBottom: 8,
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        cursor: 'pointer',
-                                        touchAction: 'manipulation',
-                                        WebkitTapHighlightColor: 'transparent',
-                                        userSelect: 'none'
-                                      }}
-                                    >
-                                      <div style={{ 
-                                        width: 48,
-                                        height: 5,
-                                        background: '#ccc',
-                                        borderRadius: 3,
-                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                                      }}></div>
-                                    </div>
                                     {/* Close Button - Top Right */}
                                     <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'flex-end' }}>
                                       <button
@@ -3367,24 +3147,21 @@ class BusesList extends Component {
                                     }}
                                     style={{ 
                                       width: '100%',
-                                      paddingTop: 12,
-                                      paddingBottom: 4,
+                                      paddingTop: 8,
+                                      paddingBottom: 8,
                                       display: 'flex',
                                       justifyContent: 'center',
-                                      alignItems: 'center',
                                       cursor: 'pointer',
                                       flexShrink: 0,
                                       touchAction: 'manipulation',
-                                      WebkitTapHighlightColor: 'transparent',
-                                      userSelect: 'none'
+                                      WebkitTapHighlightColor: 'transparent'
                                     }}
                                   >
-                                    <div style={{ 
-                                      width: 48,
-                                      height: 5,
-                                      background: '#ccc',
-                                      borderRadius: 3,
-                                      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                              <div style={{ 
+                                      width: 40,
+                                      height: 4,
+                                      background: '#ddd',
+                                      borderRadius: 2
                                     }}></div>
                                   </div>
                                   
@@ -4288,374 +4065,8 @@ class BusesList extends Component {
                           )}
                         </div>
                       )}
-                        </>
-                      )}
-                      
-                      {/* Tab 2: Board/Drop Point Selection */}
-                      {this.state.activeTab === 2 && (
-                        <div style={{ 
-                          padding: isMobile ? '20px 16px' : '40px', 
-                          background: '#fff',
-                          borderRadius: 16,
-                          maxWidth: isMobile ? '100%' : 1200,
-                          margin: '0 auto',
-                          width: '100%',
-                          height: isMobile ? 'auto' : 'calc(100vh - 200px)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          overflow: 'hidden'
-                        }}>
-                          <div style={{ 
-                            fontSize: isMobile ? 20 : 24, 
-                            fontWeight: 700, 
-                            color: '#333', 
-                            marginBottom: 8,
-                            flexShrink: 0
-                          }}>
-                            Select Boarding & Dropping Point
                     </div>
-                          <div style={{ 
-                            fontSize: 14, 
-                            color: '#666', 
-                            marginBottom: 24,
-                            flexShrink: 0
-                          }}>
-                            Choose your preferred boarding and dropping points for this journey
-                          </div>
-                          
-                          {/* Two Column Layout */}
-                          <div style={{
-                            display: 'flex',
-                            gap: isMobile ? 16 : 20,
-                            flex: 1,
-                            minHeight: 0,
-                            overflow: 'hidden',
-                            flexDirection: isMobile ? 'column' : 'row'
-                          }}>
-                            {/* Left Column - Boarding Points */}
-                            <div style={{ 
-                              flex: isMobile ? '1 1 auto' : '0 0 50%',
-                              width: isMobile ? '100%' : 'auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              minHeight: isMobile ? '300px' : 0,
-                              maxWidth: isMobile ? '100%' : '50%'
-                            }}>
-                              <label style={{ 
-                                display: 'block',
-                                fontSize: 16, 
-                                fontWeight: 600,
-                                color: '#333',
-                                marginBottom: 16,
-                                flexShrink: 0
-                              }}>
-                                Boarding Point
-                              </label>
-                              <div style={{
-                                background: '#fff',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: 12,
-                                overflowY: 'auto',
-                                overflowX: 'hidden',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                flex: 1,
-                                minHeight: 0
-                              }}>
-                                {busdata && busdata.boarding && busdata.boarding.length > 0 ? (
-                                  busdata.boarding.map((point, index) => (
-                                    <div
-                                      key={point.id}
-                                      onClick={() => this.setState({ selectedBoardingId: point.id })}
-                                      style={{
-                                        padding: '16px 20px',
-                                        cursor: 'pointer',
-                                        borderBottom: index < busdata.boarding.length - 1 ? '1px solid #e5e7eb' : 'none',
-                                        background: selectedBoardingId === point.id ? '#fff5f5' : '#fff',
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 12,
-                                        minHeight: '60px'
-                                      }}
-                                      onMouseOver={(e) => {
-                                        if (selectedBoardingId !== point.id) {
-                                          e.currentTarget.style.background = '#f9fafb';
-                                        }
-                                      }}
-                                      onMouseOut={(e) => {
-                                        if (selectedBoardingId !== point.id) {
-                                          e.currentTarget.style.background = '#fff';
-                                        }
-                                      }}
-                                    >
-                                      <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-                                        <div style={{ 
-                                          fontSize: 16, 
-                                          fontWeight: selectedBoardingId === point.id ? 600 : 500,
-                                          color: selectedBoardingId === point.id ? '#d44' : '#333',
-                                          marginBottom: 4,
-                                          wordBreak: 'break-word',
-                                          overflowWrap: 'break-word'
-                                        }}>
-                                          {point.name}
-                                        </div>
-                                        {point.time && (
-                                          <div style={{ 
-                                            fontSize: 13, 
-                                            color: '#666',
-                                            marginTop: 2
-                                          }}>
-                                            Time: {point.time}
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div style={{
-                                        width: 20,
-                                        height: 20,
-                                        borderRadius: '50%',
-                                        border: selectedBoardingId === point.id ? '6px solid #d44' : '2px solid #ddd',
-                                        background: selectedBoardingId === point.id ? '#fff' : 'transparent',
-                                        transition: 'all 0.2s',
-                                        flexShrink: 0,
-                                        marginLeft: 'auto'
-                                      }} />
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-                                    No boarding points available
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            {/* Right Column - Dropping Points */}
-                            <div style={{ 
-                              flex: isMobile ? '1 1 auto' : '0 0 50%',
-                              width: isMobile ? '100%' : 'auto',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              minHeight: isMobile ? '300px' : 0,
-                              maxWidth: isMobile ? '100%' : '50%'
-                            }}>
-                              <label style={{ 
-                                display: 'block',
-                                fontSize: 16, 
-                                fontWeight: 600,
-                                color: '#333',
-                                marginBottom: 16,
-                                flexShrink: 0
-                              }}>
-                                Dropping Point
-                              </label>
-                              <div style={{
-                                background: '#fff',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: 12,
-                                overflowY: 'auto',
-                                overflowX: 'hidden',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-                                flex: 1,
-                                minHeight: 0
-                              }}>
-                                {busdata && busdata.dropping && busdata.dropping.length > 0 ? (
-                                  busdata.dropping.map((point, index) => (
-                                    <div
-                                      key={point.id}
-                                      onClick={() => this.setState({ selectedDroppingId: point.id })}
-                                      style={{
-                                        padding: '16px 20px',
-                                        cursor: 'pointer',
-                                        borderBottom: index < busdata.dropping.length - 1 ? '1px solid #e5e7eb' : 'none',
-                                        background: selectedDroppingId === point.id ? '#fff5f5' : '#fff',
-                                        transition: 'all 0.2s',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 12,
-                                        minHeight: '60px'
-                                      }}
-                                      onMouseOver={(e) => {
-                                        if (selectedDroppingId !== point.id) {
-                                          e.currentTarget.style.background = '#f9fafb';
-                                        }
-                                      }}
-                                      onMouseOut={(e) => {
-                                        if (selectedDroppingId !== point.id) {
-                                          e.currentTarget.style.background = '#fff';
-                                        }
-                                      }}
-                                    >
-                                      <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
-                                        <div style={{ 
-                                          fontSize: 16, 
-                                          fontWeight: selectedDroppingId === point.id ? 600 : 500,
-                                          color: selectedDroppingId === point.id ? '#d44' : '#333',
-                                          marginBottom: 4,
-                                          wordBreak: 'break-word',
-                                          overflowWrap: 'break-word'
-                                        }}>
-                                          {point.name}
-                                        </div>
-                                        {point.time && (
-                                          <div style={{ 
-                                            fontSize: 13, 
-                                            color: '#666',
-                                            marginTop: 2
-                                          }}>
-                                            Time: {point.time}
-                                          </div>
-                                        )}
-                                      </div>
-                                      <div style={{
-                                        width: 20,
-                                        height: 20,
-                                        borderRadius: '50%',
-                                        border: selectedDroppingId === point.id ? '6px solid #d44' : '2px solid #ddd',
-                                        background: selectedDroppingId === point.id ? '#fff' : 'transparent',
-                                        transition: 'all 0.2s',
-                                        flexShrink: 0,
-                                        marginLeft: 'auto'
-                                      }} />
-                                    </div>
-                                  ))
-                                ) : (
-                                  <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-                                    No dropping points available
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Action Buttons */}
-                          <div style={{ 
-                            display: 'flex', 
-                            gap: 12, 
-                            justifyContent: 'flex-end',
-                            marginTop: 24,
-                            paddingTop: 24,
-                            borderTop: '1px solid #e5e7eb',
-                            flexShrink: 0
-                          }}>
-                            <button 
-                              onClick={() => this.setState({ activeTab: 1 })} 
-                              style={{ 
-                                background: 'transparent', 
-                                color: '#666', 
-                                border: '1px solid #ddd', 
-                                borderRadius: 8, 
-                                padding: '12px 24px', 
-                                fontWeight: 600, 
-                                fontSize: 16, 
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseOver={(e) => {
-                                e.currentTarget.style.background = '#f5f5f5';
-                              }}
-                              onMouseOut={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                              }}
-                            >
-                              Back
-                            </button>
-                            <button 
-                              type="button" 
-                              disabled={!selectedBoardingId || !selectedDroppingId} 
-                              onClick={() => {
-                                // Prepare busdata and then switch to tab 3
-                                const { selectedSeatsData } = this.state;
-                                let totalBase = 0;
-                                
-                                if (selectedSeatsData && selectedSeatsData.length > 0) {
-                                  selectedSeatsData.forEach(seat => {
-                                    totalBase += (seat.fare?.base || 0);
-                                  });
-                                } else {
-                                  totalBase = this.state.busdata.fares[0].base * this.state.selectedSeats.length;
-                                }
-                                
-                                const busdata = {
-                                  busid: this.state.selectedBusId,
-                                  busname: this.state.busdata.name,
-                                  bustype: this.state.busdata.type,
-                                  date: this.state.date,
-                                  DpId: this.state.selectedDroppingId,
-                                  BpId: this.state.selectedBoardingId,
-                                  BpName: this.state.busdata.boarding.find(bp => bp.id === this.state.selectedBoardingId).name,
-                                  DpName: this.state.busdata.dropping.find(dp => dp.id === this.state.selectedDroppingId).name,
-                                  Seats: this.state.selectedSeats,
-                                  SeatsData: selectedSeatsData,
-                                  Dptime: this.state.busdata.timeD,
-                                  Bptime: this.state.busdata.timeA,
-                                  traceid: this.state.traceId,
-                                  tripkey: this.state.tripKey,
-                                  from: this.state.from,
-                                  to: this.state.to,
-                                  src: this.state.fromCityName,
-                                  dst: this.state.toCityName,
-                                  fare: totalBase,
-                                  totalfare: totalBase,
-                                };
-                                localStorage.setItem("busdata", JSON.stringify(busdata));
-                                this.setState({ 
-                                  preparedBusdata: busdata,
-                                  activeTab: 3 
-                                });
-                              }}
-                              style={{ 
-                                background: (!selectedBoardingId || !selectedDroppingId) ? '#ccc' : '#d44', 
-                                color: '#fff', 
-                                border: 'none', 
-                                borderRadius: 8, 
-                                padding: '12px 32px', 
-                                fontWeight: 700, 
-                                fontSize: 16, 
-                                cursor: (!selectedBoardingId || !selectedDroppingId) ? 'not-allowed' : 'pointer',
-                                transition: 'all 0.2s',
-                                boxShadow: (!selectedBoardingId || !selectedDroppingId) ? 'none' : '0 2px 8px rgba(212, 68, 68, 0.3)'
-                              }}
-                              onMouseOver={(e) => {
-                                if (selectedBoardingId && selectedDroppingId) {
-                                  e.currentTarget.style.background = '#b91c1c';
-                                }
-                              }}
-                              onMouseOut={(e) => {
-                                if (selectedBoardingId && selectedDroppingId) {
-                                  e.currentTarget.style.background = '#d44';
-                                }
-                              }}
-                            >
-                              Continue
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Tab 3: Passenger Info */}
-                      {this.state.activeTab === 3 && this.state.preparedBusdata && (
-                        <div style={{ 
-                          padding: 0, 
-                          background: '#f5f5fa',
-                          borderRadius: 16,
-                          maxWidth: '100%',
-                          width: '100%',
-                          height: isMobile ? 'auto' : 'calc(100vh - 200px)',
-                          overflowY: 'auto',
-                          overflowX: 'hidden'
-                        }}>
-                          <PassengerDetails 
-                            busdata={this.state.preparedBusdata}
-                            history={this.props.history}
-                            onBack={() => this.setState({ activeTab: 2 })}
-                            isModal={true}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  {!isMobile && selectedSeats.length > 0 && this.state.activeTab === 1 && (
+                  {!isMobile && selectedSeats.length > 0 && (
                             <div style={{ 
                               position: 'fixed', 
                               bottom: 0, 
@@ -4669,34 +4080,27 @@ class BusesList extends Component {
                               display: 'flex',
                               justifyContent: 'space-between',
                               alignItems: 'center',
+                              flexWrap: 'wrap',
                               gap: 16,
                               animation: 'slideUpFromBottom 0.3s ease-out'
                             }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 auto', minWidth: 0, maxWidth: 'calc(100% - 400px)' }}>
-                                <div style={{ fontWeight: 700, fontSize: 18, color: '#333', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+                                <div style={{ fontWeight: 700, fontSize: 18, color: '#333' }}>
                                   {selectedSeats.length} {selectedSeats.length === 1 ? 'seat' : 'seats'}
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#333', flexShrink: 0 }}>
-                                  <span style={{ fontWeight: 700, fontSize: 20, whiteSpace: 'nowrap' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#333' }}>
+                                  <span style={{ fontWeight: 700, fontSize: 20 }}>
                                     ₹{(() => {
-                                      const { selectedSeatsData } = this.state;
-                                      // Calculate total by summing individual seat BASE prices (jo seat par dikh rahi hai)
-                                      if (selectedSeatsData && selectedSeatsData.length > 0) {
-                                        return selectedSeatsData.reduce((total, seat) => {
-                                          return total + (seat.fare?.base || 0);
-                                        }, 0);
-                                      }
-                                      // Fallback to bus fare if seat data not available
                                       if (!busdata?.fares?.[0]?.base) return selectedSeats.length * 650;
                                       return busdata.fares[0].base * selectedSeats.length;
                                     })()}
                                   </span>
-                                  <span style={{ fontSize: 14, color: '#666', whiteSpace: 'nowrap' }}>+</span>
+                                  <span style={{ fontSize: 14, color: '#666' }}>+</span>
                                 </div>
                               </div>
-                              <div style={{ display: 'flex', gap: 12, flexShrink: 0 }}>
+                              <div style={{ display: 'flex', gap: 12 }}>
                                 <button 
-                                  onClick={() => this.setState({ selectedSeats: [], selectedSeatsData: [], activeTab: 1 })} 
+                                  onClick={() => this.setState({ selectedSeats: [] })} 
                                   style={{ 
                                     background: 'transparent', 
                                     color: '#666', 
@@ -4705,9 +4109,7 @@ class BusesList extends Component {
                                     padding: '12px 20px', 
                                     fontWeight: 600, 
                                     fontSize: 16, 
-                                    cursor: 'pointer',
-                                    whiteSpace: 'nowrap',
-                                    flexShrink: 0
+                                    cursor: 'pointer'
                                   }}
                                 >
                                   Clear
@@ -4723,52 +4125,12 @@ class BusesList extends Component {
                                     fontWeight: 700, 
                                     fontSize: 16, 
                                     cursor: 'pointer',
-                                    boxShadow: '0 2px 8px rgba(212, 68, 68, 0.3)',
-                                    whiteSpace: 'nowrap',
-                                    flexShrink: 0
+                                    boxShadow: '0 2px 8px rgba(212, 68, 68, 0.3)'
                                   }}
                                 >
                                   Select boarding & dropping points
                                 </button>
                               </div>
-                            </div>
-                          )}
-                          {/* Mobile Bottom Bar - Shows when seats are selected */}
-                          {isMobile && selectedSeats.length > 0 && this.state.activeTab === 1 && (
-                            <div style={{ 
-                              position: 'fixed', 
-                              bottom: 0, 
-                              left: 0, 
-                              right: 0, 
-                              background: '#fff', 
-                              padding: '12px 16px', 
-                              boxShadow: '0 -2px 12px rgba(0,0,0,0.15)', 
-                              borderTop: '2px solid #f0f0f0',
-                              zIndex: 1003,
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              animation: 'slideUpFromBottom 0.3s ease-out'
-                            }}>
-                              <button 
-                                onClick={this.handleProceed} 
-                                style={{ 
-                                  background: '#d44', 
-                                  color: '#fff', 
-                                  border: 'none', 
-                                  borderRadius: 8, 
-                                  padding: '12px 24px', 
-                                  fontWeight: 700, 
-                                  fontSize: 16, 
-                                  cursor: 'pointer',
-                                  boxShadow: '0 2px 8px rgba(212, 68, 68, 0.3)',
-                                  whiteSpace: 'nowrap',
-                                  width: '100%',
-                                  maxWidth: '100%'
-                                }}
-                              >
-                                Select boarding & dropping points
-                              </button>
                             </div>
                           )}
                     </div>
@@ -4780,7 +4142,44 @@ class BusesList extends Component {
           </div>
         </div>
 
-        {/* Modal removed - now using tab system instead */}
+        {/* Modal for Boarding/Dropping Selection */}
+        <Modal isOpen={showBoardDropModal} toggle={() => this.setState({ showBoardDropModal: false })} centered={true}>
+          <ModalBody>
+            <h4 className="mb-3">Select Boarding & Dropping Point</h4>
+            <div className="mb-3">
+              <label htmlFor="boarding-select" className="form-label">Boarding Point</label>
+              <select
+                id="boarding-select"
+                className="form-control"
+                value={selectedBoardingId}
+                onChange={e => this.setState({ selectedBoardingId: e.target.value })}
+              >
+                <option value="">Select Boarding</option>
+                {busdata && busdata.boarding && busdata.boarding.map(point => (
+                  <option key={point.id} value={point.id}>{point.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="dropping-select" className="form-label">Dropping Point</label>
+              <select
+                id="dropping-select"
+                className="form-control"
+                value={selectedDroppingId}
+                onChange={e => this.setState({ selectedDroppingId: e.target.value })}
+              >
+                <option value="">Select Dropping</option>
+                {busdata && busdata.dropping && busdata.dropping.map(point => (
+                  <option key={point.id} value={point.id}>{point.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-light" onClick={() => this.setState({ showBoardDropModal: false })}>Cancel</button>
+              <button className="btn btn-danger" type="button" disabled={!selectedBoardingId || !selectedDroppingId} onClick={this.handleBoardDropConfirm}>Confirm</button>
+            </div>
+          </ModalBody>
+        </Modal>
       </div>
     );
   }
