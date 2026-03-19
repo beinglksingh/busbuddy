@@ -13,6 +13,7 @@ import {
   Button,
   Label,
   Alert,
+  Nav,
   NavItem,
   NavLink,
   TabContent,
@@ -65,7 +66,11 @@ class UserDashboard extends Component {
       // Date state
       selectedDate: new Date(),
       // Responsive state
-      isMobile: window.innerWidth <= 768
+      isMobile: window.innerWidth <= 768,
+      // bottom nav active item (mobile only)
+      bottomNavActive: 'home',
+      // Tab state
+      activeTab: 'bus-booking'
     };
     this.obj = this;
     // Bindings
@@ -80,6 +85,10 @@ class UserDashboard extends Component {
     this.handleResize = this.handleResize.bind(this);
     this.handleSwap = this.handleSwap.bind(this);
     this.Viewpopularbuses  = this.Viewpopularbuses.bind(this);
+    // bind bottom nav
+    this.handleBottomNavClick = this.handleBottomNavClick.bind(this);
+    // bind tab handler
+    this.toggleTab = this.toggleTab.bind(this);
   }
 
   componentDidMount() {
@@ -221,6 +230,18 @@ class UserDashboard extends Component {
     });
   }
 
+  // Added: handle bottom nav clicks (mobile only, no redirects)
+  handleBottomNavClick(key) {
+    this.setState({ bottomNavActive: key });
+  }
+
+  // Tab handler
+  toggleTab(tab) {
+    if (this.state.activeTab !== tab) {
+      this.setState({ activeTab: tab });
+    }
+  }
+
   render() {
     // Placeholder user info
     const obj = JSON.parse(sessionStorage.getItem("authUser")) || {};
@@ -229,7 +250,7 @@ class UserDashboard extends Component {
     return (
       <React.Fragment>
         {/* Header */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '0 0 0 0', minHeight: 70, display: 'flex', alignItems: 'center' }}>
+        {/* <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '0 0 0 0', minHeight: 70, display: 'flex', alignItems: 'center' }}>
           <Container fluid>
             <Row className="align-items-center" style={{ minHeight: 70 }}>
               <Col md="2" xs="6" style={{ display: 'flex', alignItems: 'center' }}>
@@ -250,7 +271,7 @@ class UserDashboard extends Component {
                 }}
               >
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  {/* User icon (Font Awesome style) */}
+                  {/* User icon (Font Awesome style) 
                   <svg
                     width="28"
                     height="28"
@@ -266,7 +287,7 @@ class UserDashboard extends Component {
               </Col>
             </Row>
           </Container>
-        </div>
+        </div> */}
 
         {/* Main Content with image background */}
         <div style={{
@@ -296,23 +317,98 @@ class UserDashboard extends Component {
               </Col>
             </Row>
 
-            {/* Search Card */}
-              <Row className="justify-content-center" style={{ marginTop: isMobile ? 140 : 80, marginBottom: isMobile ? 18 : 28 }}>
-                <Col m="10" lg="10" xs="12">
-                  <div
-                    style={{
-                      background: '#fff',
-                      borderRadius: isMobile ? 20 : 27,
-                      boxShadow: '0 8px 32px rgba(44,62,80,0.18)',
-                      padding: isMobile ? '12px 10px 10px 10px' : '20px 24px 14px 24px',
-                      display: 'flex',
-                      flexDirection: isMobile ? 'column' : 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: isMobile ? 10 : 0,
-                      position: 'relative',
-                    }}
-                  >
+            {/* Tab Navigation */}
+            <Row className="justify-content-center" style={{ marginTop: isMobile ? 20 : 30 }}>
+              <Col md="10" lg="10" xs="12">
+                <Nav tabs style={{
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  borderRadius: isMobile ? '12px' : '16px',
+                  padding: isMobile ? '8px' : '10px',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)'
+                }}>
+                  <NavItem>
+                    <NavLink
+                      style={{
+                        background: this.state.activeTab === 'bus-booking' ? '#dc2626' : 'transparent',
+                        color: this.state.activeTab === 'bus-booking' ? '#fff' : '#333',
+                        border: 'none',
+                        borderRadius: isMobile ? '8px' : '10px',
+                        fontWeight: 600,
+                        fontSize: isMobile ? '14px' : '16px',
+                        padding: isMobile ? '10px 16px' : '12px 20px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => this.toggleTab('bus-booking')}
+                    >
+                      <i className="fa fa-bus" style={{ marginRight: 8 }}></i>
+                      Bus Booking
+                    </NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink
+                      style={{
+                        background: this.state.activeTab === 'cab-booking' ? '#dc2626' : 'transparent',
+                        color: this.state.activeTab === 'cab-booking' ? '#fff' : '#333',
+                        border: 'none',
+                        borderRadius: isMobile ? '8px' : '10px',
+                        fontWeight: 600,
+                        fontSize: isMobile ? '14px' : '16px',
+                        padding: isMobile ? '10px 16px' : '12px 20px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => this.toggleTab('cab-booking')}
+                    >
+                      <i className="fa fa-car" style={{ marginRight: 8 }}></i>
+                      Cab Booking
+                    </NavLink>
+                  </NavItem>
+                  <NavItem>
+                    <NavLink
+                      style={{
+                        background: this.state.activeTab === 'donation' ? '#dc2626' : 'transparent',
+                        color: this.state.activeTab === 'donation' ? '#fff' : '#333',
+                        border: 'none',
+                        borderRadius: isMobile ? '8px' : '10px',
+                        fontWeight: 600,
+                        fontSize: isMobile ? '14px' : '16px',
+                        padding: isMobile ? '10px 16px' : '12px 20px',
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => this.toggleTab('donation')}
+                    >
+                      <i className="fa fa-heart" style={{ marginRight: 8 }}></i>
+                      Donation
+                    </NavLink>
+                  </NavItem>
+                </Nav>
+              </Col>
+            </Row>
+
+            {/* Tab Content */}
+            <TabContent activeTab={this.state.activeTab}>
+              {/* Bus Booking Tab */}
+              <TabPane tabId="bus-booking">
+                {/* Search Card */}
+                <Row className="justify-content-center" style={{ marginTop: isMobile ? 140 : 80, marginBottom: isMobile ? 18 : 28 }}>
+                  <Col m="10" lg="10" xs="12">
+                    <div
+                      style={{
+                        background: '#fff',
+                        borderRadius: isMobile ? 20 : 27,
+                        boxShadow: '0 8px 32px rgba(44,62,80,0.18)',
+                        padding: isMobile ? '12px 10px 10px 10px' : '20px 24px 14px 24px',
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: isMobile ? 10 : 0,
+                        position: 'relative',
+                      }}
+                    >
                     {/* From/To with Swap merged */}
                     <div
                       style={{
@@ -852,6 +948,7 @@ class UserDashboard extends Component {
                   </div>
                 </Col>
               </Row>
+              </TabPane>
 
             {/* Trending Offers */}
             {/* <Row className="justify-content-center">
@@ -888,6 +985,214 @@ class UserDashboard extends Component {
                 </div>
               </Col>
             </Row> */}
+
+            {/* Cab Booking Tab */}
+            <TabPane tabId="cab-booking">
+              <Row className="justify-content-center" style={{ marginTop: isMobile ? 80 : 100, marginBottom: isMobile ? 18 : 28 }}>
+                <Col md="10" lg="10" xs="12">
+                  <div style={{
+                    background: '#fff',
+                    borderRadius: isMobile ? 20 : 27,
+                    boxShadow: '0 8px 32px rgba(44,62,80,0.18)',
+                    padding: isMobile ? '20px 15px 15px 15px' : '30px 30px 20px 30px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ fontSize: isMobile ? 32 : 48, fontWeight: 800, color: '#1f2937', marginBottom: 16 }}>
+                      <i className="fa fa-car" style={{ marginRight: 15, color: '#dc2626' }}></i>
+                      Cab Booking Coming Soon
+                    </div>
+                    <p style={{ fontSize: isMobile ? 16 : 18, color: '#6b7280', lineHeight: 1.6, marginBottom: 24 }}>
+                      We are working hard to bring you the best cab booking experience. 
+                      Stay tuned for updates!
+                    </p>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      gap: 15,
+                      flexWrap: 'wrap'
+                    }}>
+                      <div style={{
+                        background: '#f3f4f6',
+                        padding: '12px 20px',
+                        borderRadius: 25,
+                        fontSize: 14,
+                        color: '#374151',
+                        fontWeight: 500
+                      }}>
+                        <i className="fa fa-map-marker" style={{ marginRight: 8 }}></i>
+                        City to City
+                      </div>
+                      <div style={{
+                        background: '#f3f4f6',
+                        padding: '12px 20px',
+                        borderRadius: 25,
+                        fontSize: 14,
+                        color: '#374151',
+                        fontWeight: 500
+                      }}>
+                        <i className="fa fa-clock-o" style={{ marginRight: 8 }}></i>
+                        24/7 Service
+                      </div>
+                      <div style={{
+                        background: '#f3f4f6',
+                        padding: '12px 20px',
+                        borderRadius: 25,
+                        fontSize: 14,
+                        color: '#374151',
+                        fontWeight: 500
+                      }}>
+                        <i className="fa fa-rupee" style={{ marginRight: 8 }}></i>
+                        Best Prices
+                      </div>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            </TabPane>
+
+            {/* Donation Tab */}
+            <TabPane tabId="donation">
+              <Row className="justify-content-center" style={{ marginTop: isMobile ? 80 : 100, marginBottom: isMobile ? 18 : 28 }}>
+                <Col md="10" lg="10" xs="12">
+                  <div style={{
+                    background: 'linear-gradient(135deg, #fff7f7 0%, #ffeef0 100%)',
+                    borderRadius: isMobile ? 20 : 27,
+                    boxShadow: '0 8px 32px rgba(44,62,80,0.18)',
+                    padding: isMobile ? '20px 15px 15px 15px' : '30px 30px 20px 30px',
+                    textAlign: 'center',
+                    border: '2px solid #fecaca'
+                  }}>
+                    <div style={{ fontSize: isMobile ? 32 : 48, fontWeight: 800, color: '#b91c1c', marginBottom: 16 }}>
+                      <i className="fa fa-heart" style={{ marginRight: 15 }}></i>
+                      Donate & Make a Difference
+                    </div>
+                    <p style={{ fontSize: isMobile ? 16 : 18, color: '#6b7280', lineHeight: 1.6, marginBottom: 24 }}>
+                      Your contribution helps us provide better services and support communities in need.
+                    </p>
+                    
+                    <Row>
+                      <Col lg="4" md="6" xs="12" className="mb-3">
+                        <div style={{
+                          background: '#fff',
+                          borderRadius: 15,
+                          padding: 20,
+                          height: '100%',
+                          border: '1px solid #fecaca',
+                          boxShadow: '0 2px 8px rgba(44,62,80,0.08)'
+                        }}>
+                          <div style={{ fontSize: 24, fontWeight: 700, color: '#b91c1c', marginBottom: 8 }}>₹500</div>
+                          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 16 }}>Basic Support</div>
+                          <Button
+                            style={{
+                              background: '#b91c1c',
+                              border: 'none',
+                              borderRadius: 25,
+                              padding: '10px 24px',
+                              fontWeight: 600,
+                              fontSize: 14,
+                              color: '#fff',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                          >
+                            Donate Now
+                          </Button>
+                        </div>
+                      </Col>
+                      
+                      <Col lg="4" md="6" xs="12" className="mb-3">
+                        <div style={{
+                          background: '#fff',
+                          borderRadius: 15,
+                          padding: 20,
+                          height: '100%',
+                          border: '1px solid #fecaca',
+                          boxShadow: '0 2px 8px rgba(44,62,80,0.08)',
+                          position: 'relative'
+                        }}>
+                          <div style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            right: '-10px',
+                            background: '#b91c1c',
+                            color: '#fff',
+                            padding: '4px 12px',
+                            borderRadius: 20,
+                            fontSize: 12,
+                            fontWeight: 600
+                          }}>
+                            POPULAR
+                          </div>
+                          <div style={{ fontSize: 24, fontWeight: 700, color: '#b91c1c', marginBottom: 8 }}>₹1000</div>
+                          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 16 }}>Standard Support</div>
+                          <Button
+                            style={{
+                              background: '#b91c1c',
+                              border: 'none',
+                              borderRadius: 25,
+                              padding: '10px 24px',
+                              fontWeight: 600,
+                              fontSize: 14,
+                              color: '#fff',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                          >
+                            Donate Now
+                          </Button>
+                        </div>
+                      </Col>
+                      
+                      <Col lg="4" md="6" xs="12" className="mb-3">
+                        <div style={{
+                          background: '#fff',
+                          borderRadius: 15,
+                          padding: 20,
+                          height: '100%',
+                          border: '1px solid #fecaca',
+                          boxShadow: '0 2px 8px rgba(44,62,80,0.08)'
+                        }}>
+                          <div style={{ fontSize: 24, fontWeight: 700, color: '#b91c1c', marginBottom: 8 }}>₹2500+</div>
+                          <div style={{ fontSize: 14, color: '#6b7280', marginBottom: 16 }}>Premium Support</div>
+                          <Button
+                            style={{
+                              background: '#b91c1c',
+                              border: 'none',
+                              borderRadius: 25,
+                              padding: '10px 24px',
+                              fontWeight: 600,
+                              fontSize: 14,
+                              color: '#fff',
+                              transition: 'all 0.2s ease'
+                            }}
+                            onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
+                          >
+                            Donate Now
+                          </Button>
+                        </div>
+                      </Col>
+                    </Row>
+                    
+                    <div style={{
+                      marginTop: 24,
+                      padding: '16px',
+                      background: '#fff',
+                      borderRadius: 12,
+                      border: '1px solid #fecaca'
+                    }}>
+                      <p style={{ margin: 0, fontSize: 14, color: '#6b7280' }}>
+                        <i className="fa fa-shield" style={{ marginRight: 8, color: '#b91c1c' }}></i>
+                        100% Secure & Transparent. Your donations make a real impact.
+                      </p>
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+            </TabPane>
+          </TabContent>
 
             {/* Bus Booking Discount Offers */}
             <Row className="justify-content-center">
@@ -1786,6 +2091,8 @@ class UserDashboard extends Component {
                     }}>
                       <p style={{ 
                         margin: 0, 
+                        
+                        
                         fontSize: 16,
                         color: '#0c4a6e',
                         fontWeight: 500,
@@ -2728,6 +3035,104 @@ class UserDashboard extends Component {
           </Container>
           <Footer/>
         </div>
+
+        {/* Mobile bottom navigation (visible only when isMobile === true) */}
+        {isMobile && (
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 64,
+              background: "#fff",
+              borderTop: "1px solid #e6e6e6",
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+              zIndex: 1200,
+              paddingBottom: "env(safe-area-inset-bottom)",
+            }}
+            role="navigation"
+            aria-label="Mobile bottom navigation"
+          >
+            <button
+              onClick={() => this.handleBottomNavClick("home")}
+              style={{
+                background: "transparent",
+                border: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: this.state.bottomNavActive === "home" ? "#dc2626" : "#6b7280",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 3l9 8h-3v8h-4v-5H10v5H6v-8H3z" />
+              </svg>
+              <span style={{ marginTop: 4 }}>Home</span>
+            </button>
+
+            <button
+              onClick={() => this.handleBottomNavClick("bookings")}
+              style={{
+                background: "transparent",
+                border: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: this.state.bottomNavActive === "bookings" ? "#dc2626" : "#6b7280",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M7 10h10v2H7zM5 4h14v2H5zM3 18h18v2H3z" />
+              </svg>
+              <span style={{ marginTop: 4 }}>Bookings</span>
+            </button>
+
+            <button
+              onClick={() => this.handleBottomNavClick("help")}
+              style={{
+                background: "transparent",
+                border: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: this.state.bottomNavActive === "help" ? "#dc2626" : "#6b7280",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm1.07-7.75l-.9.92A2.49 2.49 0 0012.5 12h-1v-1.5c0-1 .5-1.9 1.3-2.5l1-.8A2.5 2.5 0 0013.07 9.25z" />
+              </svg>
+              <span style={{ marginTop: 4 }}>Help</span>
+            </button>
+
+            <button
+              onClick={() => this.handleBottomNavClick("profile")}
+              style={{
+                background: "transparent",
+                border: "none",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                color: this.state.bottomNavActive === "profile" ? "#dc2626" : "#6b7280",
+                fontSize: 12,
+                cursor: "pointer",
+              }}
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" />
+              </svg>
+              <span style={{ marginTop: 4 }}>Profile</span>
+            </button>
+          </div>
+        )}
       </React.Fragment>
     );
   }
